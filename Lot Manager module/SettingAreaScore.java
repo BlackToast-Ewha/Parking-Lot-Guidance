@@ -31,21 +31,21 @@ public class SettingAreaScore extends JFrame implements ActionListener{
 	public SettingAreaScore(){
 		setSize(800,300);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setTitle("ÁÖÂ÷Àå °ü¸®ÀÚ ÆäÀÌÁö");
+		setTitle("ì£¼ì°¨ì¥ ê´€ë¦¬ì í˜ì´ì§€");
 		BoxLayout layout = new BoxLayout(this.getContentPane(),BoxLayout.Y_AXIS);
 		this.setLayout(layout);
 		//setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 		
 		//panel = new JPanel(new GridLayout(6,1));
 		buttonPanel = new JPanel(new FlowLayout());
-		gateLabel = new JLabel("ÁÖÂ÷Àå ÀÔ/Ãâ±¸ ¼±È£µµ ±âÁØÀ¸·Î ÁÖÂ÷ ±¸¿ªÀ» ÀÔ·ÂÇÏ¼¼¿ä",SwingConstants.CENTER);
-		elevLabel = new JLabel("¿¤¸®º£ÀÌÅÍ ¼±È£µµ ±âÁØÀ¸·Î ÁÖÂ÷ ±¸¿ªÀ» ÀÔ·ÂÇÏ¼¼¿ä",SwingConstants.CENTER);
-		disLabel = new JLabel("Àå¾ÖÀÎ ±¸¿ª ¼±È£µµ ±âÁØÀ¸·Î ÁÖÂ÷ ±¸¿ªÀ» ÀÔ·ÂÇÏ¼¼¿ä",SwingConstants.CENTER);
+		gateLabel = new JLabel("ì£¼ì°¨ì¥ ì…/ì¶œêµ¬ ì„ í˜¸ë„ ê¸°ì¤€ìœ¼ë¡œ ì£¼ì°¨ êµ¬ì—­ì„ ì…ë ¥í•˜ì„¸ìš”",SwingConstants.CENTER);
+		elevLabel = new JLabel("ì—˜ë¦¬ë² ì´í„° ì„ í˜¸ë„ ê¸°ì¤€ìœ¼ë¡œ ì£¼ì°¨ êµ¬ì—­ì„ ì…ë ¥í•˜ì„¸ìš”",SwingConstants.CENTER);
+		disLabel = new JLabel("ì¥ì• ì¸ êµ¬ì—­ ì„ í˜¸ë„ ê¸°ì¤€ìœ¼ë¡œ ì£¼ì°¨ êµ¬ì—­ì„ ì…ë ¥í•˜ì„¸ìš”",SwingConstants.CENTER);
 		gateField = new JTextField(5);
 		elevField = new JTextField(5);
 		disField = new JTextField(5);
 		gateField.setSize(2, 1);
-		saveButton = new JButton("º¯°æ »çÇ× ÀúÀå");
+		saveButton = new JButton("ë³€ê²½ ì‚¬í•­ ì €ì¥");
 		
 		this.add(gateLabel);
 		this.add(gateField);
@@ -91,7 +91,5 @@ public class SettingAreaScore extends JFrame implements ActionListener{
 		
 
 	}
-
-
 	
 }
