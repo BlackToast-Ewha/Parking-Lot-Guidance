@@ -60,87 +60,101 @@ public class main {
 	}
 
 	/*전광판에 화살표를 출력하는 함수*/
-	public static void printDisplay(List<Intersection> path) {
-		// 여기서 쪼갠다음에 하드코딩
-		int a = 0, b, c;
-		for (int i = 0; i < path.size() - 1; i++) { // path 에 intersection이 한 개일
-													// 때는 실행되지 않음
-			c = a; // 이전의 i 저장
-			a = path.get(i).index;
-			b = path.get(i + 1).index;
-			if ((b - a) == 1) {// (1->2, 2->3, 3->4, 4->5, 5->6, 7->8)
-				if (c < a) { // 정상 루트. 이전 index 가 현재 index 보다 작을 때
-					if (a == 3) {
-						display[2][0].printLeft();// 3 번 인터섹션 }
-					} else if (a == 4) {
-						display[3][0].printLeft(); // 4->5
-					} else if (a == 7) {
-						display[6][3].printRight();// 7->8
-					} else
-						display[a - 1][0].printStraight();
-				} else {// 운전자가 지도를 따르지 않아 재탐색한 경우 . 더 높은 index를 가진 intersection 에서 더 낮은 index를 가진 intersection 6->1->2 5->2->3 8->1->2 7->3->4
-					if (c == 8)
-						display[0][0].printStraight();// 812
-					else if (c == 7)
-						display[2][1].printStraight();// 734
-					else
-						display[a - 1][3].printLeft();// 612 523
-				}
-			} else if ((b - a) == -1) {// 6->5, 5->4, 4->3, 3->2, 2->1, 8->7
-				if (a == 4) { // 4->3
-					display[3][3].printRight();
-				} else if (a == 3) { // 3->2
-					if (c == 4)
-						display[2][3].printRight(); // 432
-					if (c == 7)
-						display[2][1].printLeft(); // 732
-					else
-						System.out.println("restart from intersection3"); // 3에서 재시작하여 32
-				} else if (a == 8) { // 8->7
-					display[7][0].printLeft();
-				} else { // 6->5, 5->4, 2->1
-					display[a - 1][2].printStraight();
-				}
+  public static void printDisplay(List<Intersection> path) {
+      // 여기서 쪼갠다음에 하드코딩
+      int a = 0, b, c;
+      for (int i = 0; i < path.size() - 1; i++) { // path 에 intersection이 한 개일
+         // 때는 실행되지 않음
+         c = a; // 이전의 i 저장
+         a = path.get(i).index;
+         b = path.get(i + 1).index;
+         if ((b - a) == 1) { // (1->2, 2->3, 3->4, 4->5, 5->6, 7->8)
+            if ((c - a) == -1) { // 정상 루트. 이전 인터섹션의 index 가 현재 인터섹션의 index 보다 작을 때
+               if (a == 3) { // 234
+                  display[2][0].printLeft();// 3 번 인터섹션 }
+               } else if (a == 4) {
+                  display[3][0].printLeft(); // 4->5
+               } else if (a == 7) {
+                  display[6][3].printRight();// 7->8
+               } else // 12 23 56
+                  display[a - 1][0].printStraight();
+            } else {// 이전의 인터섹션의 index 가 현재 인터섹션의 index 보다 높을 때
+                  // 612 523 812 734 256 618 218
+               if (c == 8)
+                  display[0][0].printStraight();// 812
+               else if (c == 7)
+                  display[2][1].printStraight();// 734
+               else if (c == 2 && a == 5)
+                  display[4][3].printLeft();// 256
+               else if (c == 6)
+                  display[0][3].printStraight();// 618
+               else if (c == 2 && a == 1)
+                  display[0][2].printLeft(); // 218
+               else
+                  display[a - 1][3].printLeft();// 612 523
+            }
+         } else if ((b - a) == -1) {// 6->5, 5->4, 4->3, 3->2, 2->1, 8->7
 
-			} else {// index가 이어지지 않은 경우. 1->6, 1->8, 2->5, 3->7, 그리고 그 반대 6->1, 5->2, 7->3 8->1
-				if (c < a) {// index 가 작은데서 큰데로 왔을 때
-					if (b > a) {// 016(816) 018 125 237
-						if (a == 1 && b == 8)
-							display[0][3].printStraight(); // 018 이런일 일어나면 안됨.
-						else if (a == 3)
-							display[2][0].printRight(); // 237
-						else
-							display[a - 1][0].printLeft(); // 016(816) 125
+            if (a == 4) { // 543
+               display[3][3].printRight();
+            } else if (a == 3) { // 3->2
+               if (c == 4)
+                  display[2][3].printRight(); // 432
+               if (c == 7)
+                  display[2][1].printLeft(); // 732
+               else
+                  System.out.println("restart from intersection3"); // 3에서
+               // 재시작하여
+               // 32
+            } else if (a == 8) { // 8->7
+               display[7][0].printLeft();
+            } else {// 6->5, 5->4, 2->1
+               if (c - a == -1) {
+                  display[a - 1][2].printStraight(); // 65 654 321
+               } else {
+                  display[a - 1][3].printRight(); // 165 254 521
+               }
+            }
 
-					} else {// 561 452 781
-						if (a == 8)
-							display[7][3].printRight(); // 781
-						else
-							display[a - 1][0].printLeft(); // 561 452
+         } else {// index가 이어지지 않은 경우.b-a != 1 1->6, 1->8, 2->5, 3->7, 그리고 그 반대 6->1, 8->1, 5->2,
+               // 7->3
+            if (c < a) {// index 가 작은데서 큰데로 왔을 때
+               if (b > a) {// 016(816) 018 125 237
+                  if (a == 1 && b == 8)
+                     display[0][3].printStraight(); // 018 이런일 일어나면 안됨.
+                  else if (a == 3)
+                     display[2][0].printRight(); // 237
+                  else
+                     display[a - 1][0].printLeft(); // 016(816) 125
 
-					}
+               } else {// 561 452 781
+                  if (a == 8)
+                     display[7][3].printRight(); // 781
+                  else
+                     display[a - 1][0].printLeft(); // 561 452
 
-				} else {// index 가 큰데서 작은데로 왔을 때 // 재탐색의 경우, 437 652 873 216 325
-					if (b > a) {// 437 216 325
-						if (a == 3)
-							display[2][3].printStraight(); // 437
-						else
-							display[a - 1][2].printRight(); // 216 325
+               }
 
-					} else { // 652 873
-						if (a == 5)
-							display[4][3].printRight(); // 652
-						if (a == 7)
-							display[6][0].printLeft();// 873
+            } else {// index 가 큰데서 작은데로 왔을 때, c>a // 재탐색의 경우, 437 652 873 216 325
+               if (b > a) {// 437 216 325
+                  if (a == 3)
+                     display[2][3].printStraight(); // 437
+                  else
+                     display[a - 1][2].printRight(); // 216 325
 
-					}
-				}
+               } else { // 652 873
+                  if (a == 5)
+                     display[4][3].printRight(); // 652
+                  if (a == 7)
+                     display[6][0].printLeft();// 873
 
-			}
+               }
+            }
 
-		}
-	}
+         }
 
+      }
+   }
 	/* 주차 구역 한 칸들을 초기화 하는 함수*/
 	public static void setParkingArea() {
 
