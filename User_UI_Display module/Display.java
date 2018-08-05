@@ -18,17 +18,17 @@ public class Display {
 	}
 	
 	void printRight() {
-		System.out.print(this.index+1 + this.dirToString()+" กๆ");
+		System.out.print(this.index+1 + this.dirToString()+" ยกรฆ");
 	}
 	void printLeft() {
-		System.out.print(this.index+1+ this.dirToString() + " ก็");
+		System.out.print(this.index+1+ this.dirToString() + " ยกรง");
 	}
 	void printStraight() {
-		System.out.print(this.index+1+ this.dirToString() + " ก่");
+		System.out.print(this.index+1+ this.dirToString() + " ยกรจ");
 	}
 	void printDown() {
-		System.out.print(this.index+1 + this.dirToString()+ " ก้");
+		System.out.print(this.index+1 + this.dirToString()+ " ยกรฉ");
 	}
 	
-	
+
 }
