@@ -1,15 +1,5 @@
 
 
-/*2018-08-03 UPDATE
- * (1) Path¸¦ È­»ìÇ¥·Î º¯È¯ÇÏ´Â ÀÛ¾÷ ¿Ï·á
- * (2) º¯È¯ÇÑ È­»ìÇ¥¸¦ ÄÜ¼Ö¿¡ Ãâ·ÂÇÏ´Â ÀÛ¾÷ ¿Ï·á
- * (3) ÁÖÂ÷ ±¸¿ª »ı¼º ¿Ï·á
- * (4) ÀÎÅÍ¼½¼Ç »ı¼º ¿Ï·á
- * (5) ¸ñÀûÁö ÁÖÂ÷ ±¸¿ª ÀÎÁ¢ ÀÎÅÍ¼½¼ÇÀÇ ÀÎµ¦½º ÃßÃâ ¿Ï·á
- * (6) AstarSearch()ÀÇ ¿¡·¯ ¼öÁ¤ ¿Ï·á
- * (7) ¾²ÀÌÁö ¾Ê´Â ÄÚµå¿Í ÀÇ¹Ì ¾ø´Â ÁÖ¼® Á¤¸® ¿Ï·á
- */
-
 import gnu.io.CommPortIdentifier;
 import java.util.PriorityQueue;
 import java.util.HashSet;
@@ -34,19 +24,19 @@ public class main extends JFrame{
 	
 	
 	
-	/*ÁÖÂ÷ ±¸¿ª, ÀÎÅÍ¼½¼Ç, Àü±¤ÆÇ º¯¼ö ¼±¾ğ */
+	/*ì£¼ì°¨ êµ¬ì—­, ì¸í„°ì„¹ì…˜, ì „ê´‘íŒ ë³€ìˆ˜ ì„ ì–¸ */
 	static ParkingArea[][] area = new ParkingArea[12][];
 	public static Intersection[] n = new Intersection[8];
 	static Area[] parkArea = new Area[12];
 	static Display[][] display = new Display[8][4];
 
-	/*ÁÖÂ÷ ±¸¿ªÀ» ´ã´Â ¿ì¼±¼øÀ§ Å¥¿Í ÁÖÂ÷ ±¸¿ª ÀÌ¸§À» ´ã´Â Stringº¯¼ö*/
+	/*ì£¼ì°¨ êµ¬ì—­ì„ ë‹´ëŠ” ìš°ì„ ìˆœìœ„ íì™€ ì£¼ì°¨ êµ¬ì—­ ì´ë¦„ì„ ë‹´ëŠ” Stringë³€ìˆ˜*/
 	static PriorityQueue<Area> entranceArea; 
 	static PriorityQueue<Area> elevatorArea; 
 	static PriorityQueue<Area> disabledArea; 
 	static String totalAssign; 
 	
-	/*MySQL µ¥ÀÌÅÍº£ÀÌ½º ¿¬°á¿¡ ÇÊ¿äÇÑ º¯¼ö ¼±¾ğ*/
+	/*MySQL ë°ì´í„°ë² ì´ìŠ¤ ì—°ê²°ì— í•„ìš”í•œ ë³€ìˆ˜ ì„ ì–¸*/
 	static final String JDBC_driver = "com.mysql.cj.jdbc.Driver";
 	static final String DB_url = "jdbc:mysql://localhost:3306/blacktoast?useSSL=false&serverTimezone=UTC";
 	static final String User = "root";
@@ -54,41 +44,41 @@ public class main extends JFrame{
 	static Connection conn = null;
 	static Statement stmt = null;
 	
-	/*Display ÇÔ¼ö¿¡ ³Ñ°ÜÁÖ±â À§ÇØ »ç¿ëÇÏ´Â List<Intersection> º¯¼ö*/
+	/*Display í•¨ìˆ˜ì— ë„˜ê²¨ì£¼ê¸° ìœ„í•´ ì‚¬ìš©í•˜ëŠ” List<Intersection> ë³€ìˆ˜*/
 	static List<Intersection> originalPath;
 	static List<Intersection> gateUIPath;
 	
-	/*Àü±¤ÆÇ °´Ã¼¸¦ ÃÊ±âÈ­ÇÏ´Â ÇÔ¼ö*/
+	/*ì „ê´‘íŒ ê°ì²´ë¥¼ ì´ˆê¸°í™”í•˜ëŠ” í•¨ìˆ˜*/
 	public static void setDisplay() {
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 4; j++) {
 				display[i][j] = new Display(i, j);
-				// j=0 -> u, j=1 -> l, j=2 -> d, j=3 -> r Àü±¤ÆÇÀ» ³ªÅ¸³¿,
+				// j=0 -> u, j=1 -> l, j=2 -> d, j=3 -> r ì „ê´‘íŒì„ ë‚˜íƒ€ëƒ„,
 			}
 		}
 
 	}
 
-	/*Àü±¤ÆÇ¿¡ È­»ìÇ¥¸¦ Ãâ·ÂÇÏ´Â ÇÔ¼ö*/
+	/*ì „ê´‘íŒì— í™”ì‚´í‘œë¥¼ ì¶œë ¥í•˜ëŠ” í•¨ìˆ˜*/
 	public static void printDisplay(List<Intersection> path) {
-		// ¿©±â¼­ ÂÉ°µ´ÙÀ½¿¡ ÇÏµåÄÚµù
+		// ì—¬ê¸°ì„œ ìª¼ê° ë‹¤ìŒì— í•˜ë“œì½”ë”©
 		int a = 0, b, c;
-		for (int i = 0; i < path.size() - 1; i++) { // path ¿¡ intersectionÀÌ ÇÑ °³ÀÏ
-													// ¶§´Â ½ÇÇàµÇÁö ¾ÊÀ½
-			c = a; // ÀÌÀüÀÇ i ÀúÀå
+		for (int i = 0; i < path.size() - 1; i++) { // path ì— intersectionì´ í•œ ê°œì¼
+													// ë•ŒëŠ” ì‹¤í–‰ë˜ì§€ ì•ŠìŒ
+			c = a; // ì´ì „ì˜ i ì €ì¥
 			a = path.get(i).index;
 			b = path.get(i + 1).index;
 			if ((b - a) == 1) {// (1->2, 2->3, 3->4, 4->5, 5->6, 7->8)
-				if (c < a) { // Á¤»ó ·çÆ®. ÀÌÀü index °¡ ÇöÀç index º¸´Ù ÀÛÀ» ¶§
+				if (c < a) { // ì •ìƒ ë£¨íŠ¸. ì´ì „ index ê°€ í˜„ì¬ index ë³´ë‹¤ ì‘ì„ ë•Œ
 					if (a == 3) {
-						display[2][0].printLeft();// 3 ¹ø ÀÎÅÍ¼½¼Ç }
+						display[2][0].printLeft();// 3 ë²ˆ ì¸í„°ì„¹ì…˜ }
 					} else if (a == 4) {
 						display[3][0].printLeft(); // 4->5
 					} else if (a == 7) {
 						display[6][3].printRight();// 7->8
 					} else
 						display[a - 1][0].printStraight();
-				} else {// ¿îÀüÀÚ°¡ Áöµµ¸¦ µû¸£Áö ¾Ê¾Æ ÀçÅ½»öÇÑ °æ¿ì . ´õ ³ôÀº index¸¦ °¡Áø intersection ¿¡¼­ ´õ ³·Àº index¸¦ °¡Áø intersection 6->1->2 5->2->3 8->1->2 7->3->4
+				} else {// ìš´ì „ìê°€ ì§€ë„ë¥¼ ë”°ë¥´ì§€ ì•Šì•„ ì¬íƒìƒ‰í•œ ê²½ìš° . ë” ë†’ì€ indexë¥¼ ê°€ì§„ intersection ì—ì„œ ë” ë‚®ì€ indexë¥¼ ê°€ì§„ intersection 6->1->2 5->2->3 8->1->2 7->3->4
 					if (c == 8)
 						display[0][0].printStraight();// 812
 					else if (c == 7)
@@ -105,18 +95,18 @@ public class main extends JFrame{
 					if (c == 7)
 						display[2][1].printLeft(); // 732
 					else
-						System.out.println("restart from intersection3"); // 3¿¡¼­ Àç½ÃÀÛÇÏ¿© 32
+						System.out.println("restart from intersection3"); // 3ì—ì„œ ì¬ì‹œì‘í•˜ì—¬ 32
 				} else if (a == 8) { // 8->7
 					display[7][0].printLeft();
 				} else { // 6->5, 5->4, 2->1
 					display[a - 1][2].printStraight();
 				}
 
-			} else {// index°¡ ÀÌ¾îÁöÁö ¾ÊÀº °æ¿ì. 1->6, 1->8, 2->5, 3->7, ±×¸®°í ±× ¹İ´ë 6->1, 5->2, 7->3 8->1
-				if (c < a) {// index °¡ ÀÛÀºµ¥¼­ Å«µ¥·Î ¿ÔÀ» ¶§
+			} else {// indexê°€ ì´ì–´ì§€ì§€ ì•Šì€ ê²½ìš°. 1->6, 1->8, 2->5, 3->7, ê·¸ë¦¬ê³  ê·¸ ë°˜ëŒ€ 6->1, 5->2, 7->3 8->1
+				if (c < a) {// index ê°€ ì‘ì€ë°ì„œ í°ë°ë¡œ ì™”ì„ ë•Œ
 					if (b > a) {// 016(816) 018 125 237
 						if (a == 1 && b == 8)
-							display[0][3].printStraight(); // 018 ÀÌ·±ÀÏ ÀÏ¾î³ª¸é ¾ÈµÊ.
+							display[0][3].printStraight(); // 018 ì´ëŸ°ì¼ ì¼ì–´ë‚˜ë©´ ì•ˆë¨.
 						else if (a == 3)
 							display[2][0].printRight(); // 237
 						else
@@ -130,7 +120,7 @@ public class main extends JFrame{
 
 					}
 
-				} else {// index °¡ Å«µ¥¼­ ÀÛÀºµ¥·Î ¿ÔÀ» ¶§ // ÀçÅ½»öÀÇ °æ¿ì, 437 652 873 216 325
+				} else {// index ê°€ í°ë°ì„œ ì‘ì€ë°ë¡œ ì™”ì„ ë•Œ // ì¬íƒìƒ‰ì˜ ê²½ìš°, 437 652 873 216 325
 					if (b > a) {// 437 216 325
 						if (a == 3)
 							display[2][3].printStraight(); // 437
@@ -151,7 +141,7 @@ public class main extends JFrame{
 		}
 	}
 
-	/* ÁÖÂ÷ ±¸¿ª ÇÑ Ä­µéÀ» ÃÊ±âÈ­ ÇÏ´Â ÇÔ¼ö*/
+	/* ì£¼ì°¨ êµ¬ì—­ í•œ ì¹¸ë“¤ì„ ì´ˆê¸°í™” í•˜ëŠ” í•¨ìˆ˜*/
 	public static void setParkingArea() {
 
 		area[0] = new ParkingArea[24];// A => 65
@@ -161,16 +151,16 @@ public class main extends JFrame{
 		area[4] = new ParkingArea[7];// E
 		area[5] = new ParkingArea[12];// F
 		area[6] = new ParkingArea[10];// G
-		area[7] = new ParkingArea[20];// H,¿¤¸®º£ÀÌÅÍ ±ÙÃ³
-		area[8] = new ParkingArea[2];// I,Àå¾ÖÀÎ
-		area[9] = new ParkingArea[4];// J,Àå¾ÖÀÎ
-		area[10] = new ParkingArea[3];// K,Àå¾ÖÀÎ
-		area[11] = new ParkingArea[3];// L,¿¤¸®º£ÀÌÅÍ ±ÙÃ³
+		area[7] = new ParkingArea[20];// H,ì—˜ë¦¬ë² ì´í„° ê·¼ì²˜
+		area[8] = new ParkingArea[2];// I,ì¥ì• ì¸
+		area[9] = new ParkingArea[4];// J,ì¥ì• ì¸
+		area[10] = new ParkingArea[3];// K,ì¥ì• ì¸
+		area[11] = new ParkingArea[3];// L,ì—˜ë¦¬ë² ì´í„° ê·¼ì²˜
 
-		// ÁÖÂ÷ °ø°£ °´Ã¼ ¼±¾ğ, ³ªÁß¿¡ µ¥ÀÌÅÍ º£ÀÌ½º¿Í ¿¬µ¿ÇÒ ºÎºĞ
+		// ì£¼ì°¨ ê³µê°„ ê°ì²´ ì„ ì–¸, ë‚˜ì¤‘ì— ë°ì´í„° ë² ì´ìŠ¤ì™€ ì—°ë™í•  ë¶€ë¶„
 		for (int i = 0; i < area.length; i++) {
 			for (int j = 0; j < area[i].length; j++) {
-				switch (i) { // ParkingArea(±¸¿ªÀÌ¸§, ÀÔÂ÷¿©ºÎ, ±¸¿ª ³»¿¡¼­ÀÇ index, Àå¾ÖÀÎ/ºñÀå¾ÖÀÎ)
+				switch (i) { // ParkingArea(êµ¬ì—­ì´ë¦„, ì…ì°¨ì—¬ë¶€, êµ¬ì—­ ë‚´ì—ì„œì˜ index, ì¥ì• ì¸/ë¹„ì¥ì• ì¸)
 				case 0: {
 					area[i][j] = new ParkingArea("A", 0, j, 'a');
 					break;
@@ -229,14 +219,14 @@ public class main extends JFrame{
 		}
 	}
 
-	/* ÁÖÂ÷ÀåÀÇ Intersection ÃÊ±âÈ­*/
-	public static void setIntersection() { // ¾Õ¿¡¼­ ¼±¾ğÇÑ 8 °³ÀÇ intersection ¿¡ °´Ã¼¸¦ »ı¼ºÇÏ¿© ºÎ¿©
-		// 1~8 »çÀÌÀÇ ÀÎµ¦½º ºÎ¿©
+	/* ì£¼ì°¨ì¥ì˜ Intersection ì´ˆê¸°í™”*/
+	public static void setIntersection() { // ì•ì—ì„œ ì„ ì–¸í•œ 8 ê°œì˜ intersection ì— ê°ì²´ë¥¼ ìƒì„±í•˜ì—¬ ë¶€ì—¬
+		// 1~8 ì‚¬ì´ì˜ ì¸ë±ìŠ¤ ë¶€ì—¬
 		for (int i = 0; i < 8; i++) {
 			n[i] = new Intersection((i + 1));
 
 		}
-		/* row¿Í column À» ¼³Á¤ÇÏ´Â °÷ */
+		/* rowì™€ column ì„ ì„¤ì •í•˜ëŠ” ê³³ */
 
 		n[3].setRowCol(0, 0);
 		n[4].setRowCol(1, 0);
@@ -247,62 +237,62 @@ public class main extends JFrame{
 		n[6].setRowCol(0, 2);
 		n[7].setRowCol(2, 2);
 
-		// n[i].adjacencies = ÇÑ ÀÎÅÍ¼½¼Ç¿¡¼­ ¿¬°áµÈ edgeµéÀÇ ÁıÇÕ
+		// n[i].adjacencies = í•œ ì¸í„°ì„¹ì…˜ì—ì„œ ì—°ê²°ëœ edgeë“¤ì˜ ì§‘í•©
 
 		n[0].adjacencies = new Edge[] { new Edge(n[1], 1), new Edge(n[5], 1), new Edge(n[7], 1) };
 
-		n[0].adjacencies[0].Decide_Area(area[8]);// area[8]=I±¸¿ª
-		n[0].adjacencies[1].Decide_Area(area[1]);// area[1]=B±¸¿ª
-		n[0].adjacencies[1].Decide_Area(area[2]);// area[2]=C±¸¿ª
-		n[0].adjacencies[2].Decide_Area(area[7]);// area[7]=H±¸¿ª
+		n[0].adjacencies[0].Decide_Area(area[8]);// area[8]=Iêµ¬ì—­
+		n[0].adjacencies[1].Decide_Area(area[1]);// area[1]=Bêµ¬ì—­
+		n[0].adjacencies[1].Decide_Area(area[2]);// area[2]=Cêµ¬ì—­
+		n[0].adjacencies[2].Decide_Area(area[7]);// area[7]=Hêµ¬ì—­
 
 		n[1].adjacencies = new Edge[] { new Edge(n[0], 1), new Edge(n[2], 1), new Edge(n[4], 1) };
 
-		n[1].adjacencies[0].Decide_Area(area[10]);// area[10]=K±¸¿ª
-		n[1].adjacencies[1].Decide_Area(area[5]);// area[5]=F±¸¿ª
-		n[1].adjacencies[2].Decide_Area(area[0]);// area[0]=A±¸¿ª
-		n[1].adjacencies[2].Decide_Area(area[1]);// area[0]=B±¸¿ª
+		n[1].adjacencies[0].Decide_Area(area[10]);// area[10]=Kêµ¬ì—­
+		n[1].adjacencies[1].Decide_Area(area[5]);// area[5]=Fêµ¬ì—­
+		n[1].adjacencies[2].Decide_Area(area[0]);// area[0]=Aêµ¬ì—­
+		n[1].adjacencies[2].Decide_Area(area[1]);// area[0]=Bêµ¬ì—­
 
 		n[2].adjacencies = new Edge[] { new Edge(n[1], 1), new Edge(n[3], 1), new Edge(n[6], 1) };
 
-		n[2].adjacencies[0].Decide_Area(area[8]);// area[8]=I±¸¿ª
-		n[2].adjacencies[1].Decide_Area(area[5]);// area[5]=F±¸¿ª
-		n[2].adjacencies[2].Decide_Area(area[6]);// area[6]=G±¸¿ª
+		n[2].adjacencies[0].Decide_Area(area[8]);// area[8]=Iêµ¬ì—­
+		n[2].adjacencies[1].Decide_Area(area[5]);// area[5]=Fêµ¬ì—­
+		n[2].adjacencies[2].Decide_Area(area[6]);// area[6]=Gêµ¬ì—­
 
 		n[3].adjacencies = new Edge[] { new Edge(n[2], 1), new Edge(n[4], 1), };
 
-		n[3].adjacencies[0].Decide_Area(area[5]);// area[5]=F±¸¿ª
-		n[3].adjacencies[1].Decide_Area(area[0]);// area[0]=A±¸¿ª
+		n[3].adjacencies[0].Decide_Area(area[5]);// area[5]=Fêµ¬ì—­
+		n[3].adjacencies[1].Decide_Area(area[0]);// area[0]=Aêµ¬ì—­
 
 		n[4].adjacencies = new Edge[] { new Edge(n[3], 1), new Edge(n[1], 1), new Edge(n[5], 1) };
 
-		n[4].adjacencies[0].Decide_Area(area[3]);// area[3]=D±¸¿ª
-		n[4].adjacencies[1].Decide_Area(area[5]);// area[5]=F±¸¿ª
+		n[4].adjacencies[0].Decide_Area(area[3]);// area[3]=Dêµ¬ì—­
+		n[4].adjacencies[1].Decide_Area(area[5]);// area[5]=Fêµ¬ì—­
 
 		n[5].adjacencies = new Edge[] { new Edge(n[0], 1), new Edge(n[4], 1), };
 
-		n[5].adjacencies[0].Decide_Area(area[1]);// area[1]=B±¸¿ª
-		n[5].adjacencies[0].Decide_Area(area[2]);// area[2]=C±¸¿ª
-		n[5].adjacencies[0].Decide_Area(area[10]);// area[10]=K±¸¿ª
-		n[5].adjacencies[1].Decide_Area(area[3]);// area[3]=D±¸¿ª
+		n[5].adjacencies[0].Decide_Area(area[1]);// area[1]=Bêµ¬ì—­
+		n[5].adjacencies[0].Decide_Area(area[2]);// area[2]=Cêµ¬ì—­
+		n[5].adjacencies[0].Decide_Area(area[10]);// area[10]=Kêµ¬ì—­
+		n[5].adjacencies[1].Decide_Area(area[3]);// area[3]=Dêµ¬ì—­
 
 		n[6].adjacencies = new Edge[] { new Edge(n[2], 1), new Edge(n[7], 2) };
 
-		n[6].adjacencies[0].Decide_Area(area[6]);// area[6]=G±¸¿ª
-		n[6].adjacencies[1].Decide_Area(area[7]);// area[7]=H±¸¿ª
-		n[6].adjacencies[1].Decide_Area(area[9]);// area[9]=J±¸¿ª
-		n[6].adjacencies[1].Decide_Area(area[11]);// area[11]=L±¸¿ª
+		n[6].adjacencies[0].Decide_Area(area[6]);// area[6]=Gêµ¬ì—­
+		n[6].adjacencies[1].Decide_Area(area[7]);// area[7]=Hêµ¬ì—­
+		n[6].adjacencies[1].Decide_Area(area[9]);// area[9]=Jêµ¬ì—­
+		n[6].adjacencies[1].Decide_Area(area[11]);// area[11]=Lêµ¬ì—­
 
 		n[7].adjacencies = new Edge[] { new Edge(n[0], 1), new Edge(n[6], 2) };
 
-		n[7].adjacencies[0].Decide_Area(area[10]);// area[10]=K±¸¿ª
-		n[7].adjacencies[1].Decide_Area(area[7]);// area[7]=H±¸¿ª
-		n[7].adjacencies[1].Decide_Area(area[9]);// area[9]=J±¸¿ª
-		n[7].adjacencies[1].Decide_Area(area[11]);// area[11]=L±¸¿ª
+		n[7].adjacencies[0].Decide_Area(area[10]);// area[10]=Kêµ¬ì—­
+		n[7].adjacencies[1].Decide_Area(area[7]);// area[7]=Hêµ¬ì—­
+		n[7].adjacencies[1].Decide_Area(area[9]);// area[9]=Jêµ¬ì—­
+		n[7].adjacencies[1].Decide_Area(area[11]);// area[11]=Lêµ¬ì—­
 	}
 
-	/*ÁÖÂ÷ ±¸¿ª (A,B µî)À» ÃÊ±âÈ­ ÇÏ´Â ÇÔ¼ö
-	 * ±¸¿ªÀÇ ÀÌ¸§(¾ËÆÄºª), ÀÜ¿©±¸¿ª ¼ö, ÀüÃ¼±¸¿ª ¼ö, ±¸¿ª°ú °¡±î¿î ÀÎÅÍ¼½¼ÇÀ» ÁöÁ¤ÇÏ°Ô µÊ.
+	/*ì£¼ì°¨ êµ¬ì—­ (A,B ë“±)ì„ ì´ˆê¸°í™” í•˜ëŠ” í•¨ìˆ˜
+	 * êµ¬ì—­ì˜ ì´ë¦„(ì•ŒíŒŒë²³), ì”ì—¬êµ¬ì—­ ìˆ˜, ì „ì²´êµ¬ì—­ ìˆ˜, êµ¬ì—­ê³¼ ê°€ê¹Œìš´ ì¸í„°ì„¹ì…˜ì„ ì§€ì •í•˜ê²Œ ë¨.
 	 */
 	public static void setArea() {
 		parkArea[0] = new Area("A", 24, 24, n[1], 0);
@@ -320,9 +310,9 @@ public class main extends JFrame{
 
 	}
 
-	/*2018-08-01 AstarSearch°¡ parent »Ó¸¸ ¾Æ´Ï¶ó child ³ëµå¸¦ ¼³Á¤ÇÏ°Ô ¸¸µé¾úÀ½
-	 * µû¶ó¼­ ±âÁ¸ÀÇ printPath()¿Í ´Ş¸® ÀÚ½ÅÀÇ ÀÚ½Ä³ëµå¸¦ È®ÀÎÇÏ¸ç path¸¦ Ãâ·ÂÇÏ°Ô ÇÏ´Â ÇÔ¼ö ÇÊ¿ä
-	 * ±×°Ô printPathTemp()ÀÓ. 
+	/*2018-08-01 AstarSearchê°€ parent ë¿ë§Œ ì•„ë‹ˆë¼ child ë…¸ë“œë¥¼ ì„¤ì •í•˜ê²Œ ë§Œë“¤ì—ˆìŒ
+	 * ë”°ë¼ì„œ ê¸°ì¡´ì˜ printPath()ì™€ ë‹¬ë¦¬ ìì‹ ì˜ ìì‹ë…¸ë“œë¥¼ í™•ì¸í•˜ë©° pathë¥¼ ì¶œë ¥í•˜ê²Œ í•˜ëŠ” í•¨ìˆ˜ í•„ìš”
+	 * ê·¸ê²Œ printPathTemp()ì„. 
 	 */
 	public static List<Intersection> printPathTemp(Intersection source,Intersection dest,Intersection beforeIntsc){
 		
@@ -352,7 +342,7 @@ public class main extends JFrame{
 		return allPath.get(minIndex);
 	}
 
-	/*±âÁ¸¿¡ »ç¿ëÇÏ´ø path Ãâ·ÂÇÔ¼ö */
+	/*ê¸°ì¡´ì— ì‚¬ìš©í•˜ë˜ path ì¶œë ¥í•¨ìˆ˜ */
 	public static List<Intersection> printPath(Intersection target) {
 		List<Intersection> path = new ArrayList<Intersection>();
 
@@ -366,16 +356,16 @@ public class main extends JFrame{
 		return path;
 	}
 
-	/*destination node(=goal)¸¸ ÇÊ¿äÇÏ´ø ±âÁ¸ÀÇ AstarSearch¸¦ source,goal,¹æ±İ Áö³ª¿Â ÀÎÅÍ¼½¼Ç±îÁö °í·ÁÇÏ°Ô ÇÏ´Â
-	 * ÇÔ¼ö·Î º¯°æ
+	/*destination node(=goal)ë§Œ í•„ìš”í•˜ë˜ ê¸°ì¡´ì˜ AstarSearchë¥¼ source,goal,ë°©ê¸ˆ ì§€ë‚˜ì˜¨ ì¸í„°ì„¹ì…˜ê¹Œì§€ ê³ ë ¤í•˜ê²Œ í•˜ëŠ”
+	 * í•¨ìˆ˜ë¡œ ë³€ê²½
 	 */
 	public static void AstarSearch(Intersection source, Intersection goal, Intersection beforeIntsc) {
 
-		/*Áö³ª¿Â ÀÎÅÍ¼½¼ÇµéÀ» ´ã´Â °´Ã¼ Set explored*/
+		/*ì§€ë‚˜ì˜¨ ì¸í„°ì„¹ì…˜ë“¤ì„ ë‹´ëŠ” ê°ì²´ Set explored*/
 		Set<Intersection> explored = new HashSet<Intersection>();
 
-		/*ÈÄº¸°¡ µÇ´Â ÀÎÅÍ¼½¼ÇÀ» ´ã´Â PriorityQueue queue
-		 * f_score°¡ ³·À» ¼ö·Ï ¿ì¼± ¼øÀ§°¡ ³ô´Ù*/
+		/*í›„ë³´ê°€ ë˜ëŠ” ì¸í„°ì„¹ì…˜ì„ ë‹´ëŠ” PriorityQueue queue
+		 * f_scoreê°€ ë‚®ì„ ìˆ˜ë¡ ìš°ì„  ìˆœìœ„ê°€ ë†’ë‹¤*/
 		PriorityQueue<Intersection> queue = new PriorityQueue<Intersection>(20, new Comparator<Intersection>() {
 			// override compare method
 			public int compare(Intersection i, Intersection j) {
@@ -410,7 +400,7 @@ public class main extends JFrame{
 			// goal found
 			if (current.index == goal.index) {
 				found = true;
-				break; // ¹Ù·Î while¹® Å»Ãâ. 
+				break; // ë°”ë¡œ whileë¬¸ íƒˆì¶œ. 
 			}
 
 			// check every child of current node
@@ -441,7 +431,7 @@ public class main extends JFrame{
 					if (queue.contains(child)) {
 						queue.remove(child);
 					}
-					if (child != beforeIntsc){ // ¿¬°áµÇ¾îÀÖ´Â ÀÎÅÍ¼½¼ÇÀÌ ¹æ±İ Áö³ª¿Â ÀÎÅÍ¼½¼ÇÀÌ ¾Æ´Ñ °æ¿ì¿¡¸¸ queue¿¡ Ãß°¡. ÈÄÁø ¾È³»¸¦ ¸·±â À§ÇÑ ÄÚµåÀÓ
+					if (child != beforeIntsc){ // ì—°ê²°ë˜ì–´ìˆëŠ” ì¸í„°ì„¹ì…˜ì´ ë°©ê¸ˆ ì§€ë‚˜ì˜¨ ì¸í„°ì„¹ì…˜ì´ ì•„ë‹Œ ê²½ìš°ì—ë§Œ queueì— ì¶”ê°€. í›„ì§„ ì•ˆë‚´ë¥¼ ë§‰ê¸° ìœ„í•œ ì½”ë“œì„
 						queue.add(child);
 						current.child = child;
 						if(child.index == goal.index)
@@ -455,26 +445,26 @@ public class main extends JFrame{
 		} 
 	}
 
-	/*¼±È£ÇÏ´Â ±¸¿ª (¿¤¸®º£ÀÌÅÍ, °ÔÀÌÆ®, Àå¾ÖÀÎ ÁÖÂ÷±¸¿ª)¿¡ µû¶ó ÀÎÁ¢ÇÑ ÀÎÅÍ¼½¼ÇÀÇ ÀÎµ¦½º¸¦ ¹İÈ¯*/
+	/*ì„ í˜¸í•˜ëŠ” êµ¬ì—­ (ì—˜ë¦¬ë² ì´í„°, ê²Œì´íŠ¸, ì¥ì• ì¸ ì£¼ì°¨êµ¬ì—­)ì— ë”°ë¼ ì¸ì ‘í•œ ì¸í„°ì„¹ì…˜ì˜ ì¸ë±ìŠ¤ë¥¼ ë°˜í™˜*/
 	public static int find_dest(String mode) {
-		int findFlag = 0; // ÁÖÂ÷ ±¸¿ªÀÌ ÇÒ´çµÇ¾ú´ÂÁö Ã¼Å©ÇÏ´Â flag º¯¼ö
-		String selectedAreaName = ""; // »óÀ§ ±¸¿ªÀÇ ÀÌ¸§À» ´ãÀ» String º¯¼ö
-		int selectedLotNumber = 0; // »óÀ§ ±¸¿ª ³»¿¡¼­ ±¸¿ª ¹øÈ£¸¦ ´ã´Â int º¯¼ö
-		Intersection answer = null; // ¼±Á¤µÈ ÁÖÂ÷ ±¸¿ªÀÇ »óÀ§ ±¸¿ªÀÇ ÀÎÁ¢ ÀÎÅÍ¼½¼ÇÀ» ´ã´Â Intersection º¯¼ö
-		if (mode.equals("entrance")) { // ÀÔ±¸ ±ÙÃ³¸¦ ¼±ÅÃÇÑ °æ¿ì
+		int findFlag = 0; // ì£¼ì°¨ êµ¬ì—­ì´ í• ë‹¹ë˜ì—ˆëŠ”ì§€ ì²´í¬í•˜ëŠ” flag ë³€ìˆ˜
+		String selectedAreaName = ""; // ìƒìœ„ êµ¬ì—­ì˜ ì´ë¦„ì„ ë‹´ì„ String ë³€ìˆ˜
+		int selectedLotNumber = 0; // ìƒìœ„ êµ¬ì—­ ë‚´ì—ì„œ êµ¬ì—­ ë²ˆí˜¸ë¥¼ ë‹´ëŠ” int ë³€ìˆ˜
+		Intersection answer = null; // ì„ ì •ëœ ì£¼ì°¨ êµ¬ì—­ì˜ ìƒìœ„ êµ¬ì—­ì˜ ì¸ì ‘ ì¸í„°ì„¹ì…˜ì„ ë‹´ëŠ” Intersection ë³€ìˆ˜
+		if (mode.equals("entrance")) { // ì…êµ¬ ê·¼ì²˜ë¥¼ ì„ íƒí•œ ê²½ìš°
 			while (findFlag != 1) {
-				Area tempArea = entranceArea.poll(); // ¿ì¼±¼øÀ§Å¥ÀÇ ·çÆ® ³ëµå¸¦ ²¨³¿. ÇöÀç ÁÖÂ÷ÀåÀÇ »óÈ²À» ¹İ¿µÇÑ ÃÖ¼±ÀÇ ÁÖÂ÷ ±¸¿ª µµÃâ
-				if (tempArea.remainNum != 0) { // µµÃâÇÑ »óÀ§ ±¸¿ªÀÇ ÀÜ¿© ±¸¿ª¼ö°¡ 0ÀÌ ¾Æ´Ï¶ó¸é
-					selectedAreaName = tempArea.AreaName; // ±¸¿ª ÀÌ¸§ º¯¼ö ¼³Á¤
-					selectedLotNumber = tempArea.totalNum - tempArea.remainNum + 1; // ±¸¿ª¹øÈ£ º¯¼ö ¼³Á¤
-					tempArea.remainNum--; // inº¯¼ö¸¦ 1·Î ¹Ù²Ù´Â°Í°ú µ¿ÀÏÇÑ ¿ªÇÒÀ» ÇÔ. ÀÜ¿© ±¸¿ª ¼ö¸¦ 1 ÁÙÀÓ
-					entranceArea.add(tempArea); // peek()ÀÌ ¾Æ´Ï¶ó ¾Æ¿¹ Å¥ ³»¿¡¼­ Area¸¦ ²¨³ÂÀ¸¹Ç·Î ´Ù½Ã ³Ö¾îÁÜ
-					answer = tempArea.nearIntersection; // ÀÎÁ¢ ÀÎÅÍ¼½¼Ç ¹Ş¾Æ¿È
-					findFlag = 1; // ÁÖÂ÷ ±¸¿ª ÇÒ´ç ¿Ï·á¸¦ ¶æÇÏ´Â º¯¼ö¸¦ 1·Î ¹Ù²Ş
+				Area tempArea = entranceArea.poll(); // ìš°ì„ ìˆœìœ„íì˜ ë£¨íŠ¸ ë…¸ë“œë¥¼ êº¼ëƒ„. í˜„ì¬ ì£¼ì°¨ì¥ì˜ ìƒí™©ì„ ë°˜ì˜í•œ ìµœì„ ì˜ ì£¼ì°¨ êµ¬ì—­ ë„ì¶œ
+				if (tempArea.remainNum != 0) { // ë„ì¶œí•œ ìƒìœ„ êµ¬ì—­ì˜ ì”ì—¬ êµ¬ì—­ìˆ˜ê°€ 0ì´ ì•„ë‹ˆë¼ë©´
+					selectedAreaName = tempArea.AreaName; // êµ¬ì—­ ì´ë¦„ ë³€ìˆ˜ ì„¤ì •
+					selectedLotNumber = tempArea.totalNum - tempArea.remainNum + 1; // êµ¬ì—­ë²ˆí˜¸ ë³€ìˆ˜ ì„¤ì •
+					tempArea.remainNum--; // inë³€ìˆ˜ë¥¼ 1ë¡œ ë°”ê¾¸ëŠ”ê²ƒê³¼ ë™ì¼í•œ ì—­í• ì„ í•¨. ì”ì—¬ êµ¬ì—­ ìˆ˜ë¥¼ 1 ì¤„ì„
+					entranceArea.add(tempArea); // peek()ì´ ì•„ë‹ˆë¼ ì•„ì˜ˆ í ë‚´ì—ì„œ Areaë¥¼ êº¼ëƒˆìœ¼ë¯€ë¡œ ë‹¤ì‹œ ë„£ì–´ì¤Œ
+					answer = tempArea.nearIntersection; // ì¸ì ‘ ì¸í„°ì„¹ì…˜ ë°›ì•„ì˜´
+					findFlag = 1; // ì£¼ì°¨ êµ¬ì—­ í• ë‹¹ ì™„ë£Œë¥¼ ëœ»í•˜ëŠ” ë³€ìˆ˜ë¥¼ 1ë¡œ ë°”ê¿ˆ
 				} else {
-					if (entranceArea.isEmpty()) // ÁÖÂ÷ÀåÀÌ ¸¸Â÷ÀÌ¸é findFlag º¯¼ö¸¦ 0À¸·Î µÎ°í (º¯°æ ¾øÀÌ) ·çÇÁ Å»Ãâ
+					if (entranceArea.isEmpty()) // ì£¼ì°¨ì¥ì´ ë§Œì°¨ì´ë©´ findFlag ë³€ìˆ˜ë¥¼ 0ìœ¼ë¡œ ë‘ê³  (ë³€ê²½ ì—†ì´) ë£¨í”„ íƒˆì¶œ
 						break;
-					continue; // ÁÖÂ÷ÀåÀº ¸¸Â÷°¡ ¾Æ´ÏÁö¸¸ poll()ÇÑ ÁÖÂ÷ ±¸¿ªÀÇ ÀÜ¿© ±¸¿ª¼ö°¡ 0ÀÎ °æ¿ì ´Ù½Ã while·Î µ¹¾Æ°¡¼­ °è¼Ó poll()
+					continue; // ì£¼ì°¨ì¥ì€ ë§Œì°¨ê°€ ì•„ë‹ˆì§€ë§Œ poll()í•œ ì£¼ì°¨ êµ¬ì—­ì˜ ì”ì—¬ êµ¬ì—­ìˆ˜ê°€ 0ì¸ ê²½ìš° ë‹¤ì‹œ whileë¡œ ëŒì•„ê°€ì„œ ê³„ì† poll()
 				}
 			}
 
@@ -516,17 +506,17 @@ public class main extends JFrame{
 			}
 		}
 		if (findFlag == 0) {
-			System.out.println("[¸¸Â÷]ÁÖÂ÷Àå¿¡ ÀÔÂ÷ÇÏ½Ç ¼ö ¾ø½À´Ï´Ù!!");
+			System.out.println("[ë§Œì°¨]ì£¼ì°¨ì¥ì— ì…ì°¨í•˜ì‹¤ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!!");
 			return -1;
 		}
 		totalAssign = selectedAreaName + selectedLotNumber;
 
-		System.out.println("¹èÁ¤µÈ ÁÖÂ÷±¸¿ªÀº " + selectedAreaName + selectedLotNumber + "ÀÔ´Ï´Ù");
-		return answer.index - 1; //(0~7 »çÀÌÀÇ ÀÎµ¦½º ¹İÈ¯)
+		System.out.println("ë°°ì •ëœ ì£¼ì°¨êµ¬ì—­ì€ " + selectedAreaName + selectedLotNumber + "ì…ë‹ˆë‹¤");
+		return answer.index - 1; //(0~7 ì‚¬ì´ì˜ ì¸ë±ìŠ¤ ë°˜í™˜)
 	}
 
-	/* ÀÔ±¸, ¿¤¸®º£ÀÌÅÍ, Àå¾ÖÀÎ ÁÖÂ÷ ±¸¿ª¿¡ µû¸¥ °¢°¢ÀÇ ¿ì¼±¼øÀ§Å¥¸¦ ¼³Á¤ÇÔ.
-	*¿ì¼±¼øÀ§´Â ¼±È£±¸¿ªÀ¸·ÎºÎÅÍÀÇ °Å¸®^2+ÀÜ¿©±¸¿ª/ÀüÃ¼±¸¿ª¼ö ºñÀ²·Î °áÁ¤ */
+	/* ì…êµ¬, ì—˜ë¦¬ë² ì´í„°, ì¥ì• ì¸ ì£¼ì°¨ êµ¬ì—­ì— ë”°ë¥¸ ê°ê°ì˜ ìš°ì„ ìˆœìœ„íë¥¼ ì„¤ì •í•¨.
+	*ìš°ì„ ìˆœìœ„ëŠ” ì„ í˜¸êµ¬ì—­ìœ¼ë¡œë¶€í„°ì˜ ê±°ë¦¬^2+ì”ì—¬êµ¬ì—­/ì „ì²´êµ¬ì—­ìˆ˜ ë¹„ìœ¨ë¡œ ê²°ì • */
 	public static void setPriorityQueue() {
 		entranceArea = new PriorityQueue<Area>(12, new Comparator<Area>() {
 
@@ -571,18 +561,18 @@ public class main extends JFrame{
 		});
 	}
 
-	/*ÀÎÅÍ¼½¼ÇÀÇ h_score¸¦ À¯µ¿ÀûÀ¸·Î °è»ê*/
+	/*ì¸í„°ì„¹ì…˜ì˜ h_scoreë¥¼ ìœ ë™ì ìœ¼ë¡œ ê³„ì‚°*/
 	public static void setIntersectionInfo(Intersection goal) {
 		for (int i = 0; i < 8; i++) {
 			n[i].calculateHScore(goal);
 		}
 	}
 
-	/*¼±È£µµ¿¡ ¸Â°Ô ÁÖÂ÷ ±¸¿ªÀÇ Á¡¼ö¸¦ °è»êÇÏ´Â ÇÔ¼ö*/
-	/*½Ã°£ º¹Àâµµ°¡ ³ôÀ¸³ª ÁÖÂ÷Àå ÃÊ±â ¼¼ÆÃ¿¡¸¸ ¾²ÀÌ´Â ÇÔ¼öÀÌ¹Ç·Î ÇÏ·ç¿¡ 1È¸ ÀÌÇÏ·Î È£ÃâµÊ*/
+	/*ì„ í˜¸ë„ì— ë§ê²Œ ì£¼ì°¨ êµ¬ì—­ì˜ ì ìˆ˜ë¥¼ ê³„ì‚°í•˜ëŠ” í•¨ìˆ˜*/
+	/*ì‹œê°„ ë³µì¡ë„ê°€ ë†’ìœ¼ë‚˜ ì£¼ì°¨ì¥ ì´ˆê¸° ì„¸íŒ…ì—ë§Œ ì“°ì´ëŠ” í•¨ìˆ˜ì´ë¯€ë¡œ í•˜ë£¨ì— 1íšŒ ì´í•˜ë¡œ í˜¸ì¶œë¨*/
 	public static void setParkAreaScore() throws IOException {
 		int setCount = 0;
-		/*ÁÖÂ÷Àå °ü¸®ÀÚ°¡ ÀÔ·ÂÇÑ Á¤º¸¿¡ ¸ÂÃß¾î Á¡¼ö °è»ê*/
+		/*ì£¼ì°¨ì¥ ê´€ë¦¬ìê°€ ì…ë ¥í•œ ì •ë³´ì— ë§ì¶”ì–´ ì ìˆ˜ ê³„ì‚°*/
 		BufferedReader br = new BufferedReader(new FileReader("managerUI_Test.txt"));
 
 		while (true) {
@@ -634,35 +624,35 @@ public class main extends JFrame{
 			line = br.readLine();
 			String carPlate = line;
 			String listPath = "";
-			System.out.println("================= ÁÖÂ÷ ¾È³» ½Ã½ºÅÛ =================");
-			System.out.println(carPlate + "´Ô ¼±È£ÇÏ´Â ±¸¿ªÀ» ¼±ÅÃÇØ ÁÖ¼¼¿ä");
-			System.out.println("1. ÁÖÂ÷Àå ÀÔ/Ãâ±¸ ±ÙÃ³ ");
-			System.out.println("2. ¿¤¸®º£ÀÌÅÍ ±ÙÃ³ ");
-			System.out.println("3. Àå¾ÖÀÎ Àü¿ë ÁÂ¼®");
-			System.out.println("4. Á¾·á");
-			System.out.print("¹øÈ£¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä : ");
+			System.out.println("================= ì£¼ì°¨ ì•ˆë‚´ ì‹œìŠ¤í…œ =================");
+			System.out.println(carPlate + "ë‹˜ ì„ í˜¸í•˜ëŠ” êµ¬ì—­ì„ ì„ íƒí•´ ì£¼ì„¸ìš”");
+			System.out.println("1. ì£¼ì°¨ì¥ ì…/ì¶œêµ¬ ê·¼ì²˜ ");
+			System.out.println("2. ì—˜ë¦¬ë² ì´í„° ê·¼ì²˜ ");
+			System.out.println("3. ì¥ì• ì¸ ì „ìš© ì¢Œì„");
+			System.out.println("4. ì¢…ë£Œ");
+			System.out.print("ë²ˆí˜¸ë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš” : ");
 			user_input = sc.nextInt();
 
 			switch (user_input) {
 			case 1: {
-				int dest = 0;// ¸ñÀûÁö ÀÎÅÍ¼½¼ÇÀÇ ¹øÈ£¸¦ ÀúÀåÇÒ º¯¼ö
+				int dest = 0;// ëª©ì ì§€ ì¸í„°ì„¹ì…˜ì˜ ë²ˆí˜¸ë¥¼ ì €ì¥í•  ë³€ìˆ˜
 				try {
 					dest = find_dest("entrance");
-				} // ¸ñÀûÁö ÀÎÅÍ¼½¼Ç ¹× ±¸¿ªÀ» Ã£´Â´Ù.
+				} // ëª©ì ì§€ ì¸í„°ì„¹ì…˜ ë° êµ¬ì—­ì„ ì°¾ëŠ”ë‹¤.
 				catch (NullPointerException e) {
 					System.out.println(e);
 				}
 				System.out.println("Destination: n" + dest);
 
 
-				if (dest == -1) { // ÁÖÂ÷ÀåÀÌ ¸¸Â÷ÀÎ °æ¿ì dest¿¡´Â -1ÀÌ returnµÇµµ·Ï ¼³Á¤ÇØ³ùÀ½
-					System.out.println("ÁÖÂ÷Àå¿¡ ÀÔÂ÷ÇÏ½Ç ¼ö ¾ø½À´Ï´Ù! ½Ã½ºÅÛÀ» ¸¶Ä¡°Ú½À´Ï´Ù");
-					System.exit(0); // ½Ã½ºÅÛ ÀüÃ¼ Á¾·á
+				if (dest == -1) { // ì£¼ì°¨ì¥ì´ ë§Œì°¨ì¸ ê²½ìš° destì—ëŠ” -1ì´ returnë˜ë„ë¡ ì„¤ì •í•´ë†¨ìŒ
+					System.out.println("ì£¼ì°¨ì¥ì— ì…ì°¨í•˜ì‹¤ ìˆ˜ ì—†ìŠµë‹ˆë‹¤! ì‹œìŠ¤í…œì„ ë§ˆì¹˜ê² ìŠµë‹ˆë‹¤");
+					System.exit(0); // ì‹œìŠ¤í…œ ì „ì²´ ì¢…ë£Œ
 				}
 
 				else {
-					AstarSearch(n[0], n[dest], null);// ¸ñÀûÁö ÀÎÅÍ¼½¼Ç±îÁöÀÇ °æ·Î¸¦ Ãâ·Â
-					gateUIPath = printPath(n[dest]); // list type ÀÇ path ¹ŞÀ½
+					AstarSearch(n[0], n[dest], null);// ëª©ì ì§€ ì¸í„°ì„¹ì…˜ê¹Œì§€ì˜ ê²½ë¡œë¥¼ ì¶œë ¥
+					gateUIPath = printPath(n[dest]); // list type ì˜ path ë°›ìŒ
 					System.out.println("Path: " + gateUIPath);
 					printDisplay(gateUIPath);
 					System.out.println();
@@ -684,7 +674,7 @@ public class main extends JFrame{
 				System.out.println("Destination: n" + (dest + 1));
 
 				if (dest == -1) {
-					System.out.println("ÁÖÂ÷Àå¿¡ ÀÔÂ÷ÇÏ½Ç ¼ö ¾ø½À´Ï´Ù!");
+					System.out.println("ì£¼ì°¨ì¥ì— ì…ì°¨í•˜ì‹¤ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!");
 					System.exit(0);
 				} else {
 					AstarSearch(n[0], n[dest], null);
@@ -708,7 +698,7 @@ public class main extends JFrame{
 				}
 				System.out.println("Destination: n" + (dest + 1));
 				if (dest == -1) {
-					System.out.println("ÁÖÂ÷Àå¿¡ ÀÜ¿© ÁÖÂ÷ ±¸¿ªÀÌ ¾ø½À´Ï´Ù!");
+					System.out.println("ì£¼ì°¨ì¥ì— ì”ì—¬ ì£¼ì°¨ êµ¬ì—­ì´ ì—†ìŠµë‹ˆë‹¤!");
 					System.exit(0);
 				} else {
 					AstarSearch(n[0], n[dest], null);
@@ -724,7 +714,7 @@ public class main extends JFrame{
 
 			}
 			case 4: {
-				System.out.println("½Ã½ºÅÛÀ» ¸¶Ä¡°Ú½À´Ï´Ù.");
+				System.out.println("ì‹œìŠ¤í…œì„ ë§ˆì¹˜ê² ìŠµë‹ˆë‹¤.");
 				conn.close();
 				stmt.close();
 				break;
@@ -738,10 +728,10 @@ public class main extends JFrame{
 
 	}
 
-	/*Â÷·®ÀÌ Àü±¤ÆÇÀÇ ¾È³» Áö½Ã¸¦ µû¸£Áö ¾Ê°í (°íÀÇµç ¾Æ´Ïµç) ±æÀ» Àß¸ø µé¾úÀ» ¶§ ÇØ´ç ÀÎÅÍ¼½¼Ç¿¡¼­ ¹Ù·Î 
-	 * ÁÖÂ÷ ±¸¿ªÀ» »õ·Î ¼³Á¤ÇØÁÖÀÚ°í ÀÌ¾ß±â ÇßÀ» ¶§ ¸¸µç ÇÔ¼ö
-	 * ¿îÀüÀÚ°¡ ¿¡·¯¸¦ ÀÏÀ¸Ä×À» ¶§ È£ÃâµÇ´Â ÇÔ¼öÀÌ¸ç ÇöÀç »ç¿ëÇÏÁö ¾Ê°í ÀÖÀ½
-	 * ±×·¯³ª ³ªÁß¿¡ ÇÊ¿äÇÏ°Ô µÉ±îºÁ(´Ù¸¥ ÇÔ¼öÀÇ Ä¡¸íÀûÀÎ ¿¡·¯ µîÀÇ ¹®Á¦·Î) ÀÏ´Ü »èÁ¦ÇÏÁö ¾Ê¾ÒÀ½
+	/*ì°¨ëŸ‰ì´ ì „ê´‘íŒì˜ ì•ˆë‚´ ì§€ì‹œë¥¼ ë”°ë¥´ì§€ ì•Šê³  (ê³ ì˜ë“  ì•„ë‹ˆë“ ) ê¸¸ì„ ì˜ëª» ë“¤ì—ˆì„ ë•Œ í•´ë‹¹ ì¸í„°ì„¹ì…˜ì—ì„œ ë°”ë¡œ 
+	 * ì£¼ì°¨ êµ¬ì—­ì„ ìƒˆë¡œ ì„¤ì •í•´ì£¼ìê³  ì´ì•¼ê¸° í–ˆì„ ë•Œ ë§Œë“  í•¨ìˆ˜
+	 * ìš´ì „ìê°€ ì—ëŸ¬ë¥¼ ì¼ìœ¼ì¼°ì„ ë•Œ í˜¸ì¶œë˜ëŠ” í•¨ìˆ˜ì´ë©° í˜„ì¬ ì‚¬ìš©í•˜ì§€ ì•Šê³  ìˆìŒ
+	 * ê·¸ëŸ¬ë‚˜ ë‚˜ì¤‘ì— í•„ìš”í•˜ê²Œ ë ê¹Œë´(ë‹¤ë¥¸ í•¨ìˆ˜ì˜ ì¹˜ëª…ì ì¸ ì—ëŸ¬ ë“±ì˜ ë¬¸ì œë¡œ) ì¼ë‹¨ ì‚­ì œí•˜ì§€ ì•Šì•˜ìŒ
 	 */
 	@SuppressWarnings("null")
 	public static int find_dest_err(Intersection current, String[] area_path, String numPlate, Intersection beforeGoal)
@@ -752,13 +742,13 @@ public class main extends JFrame{
 		Statement stmt1 = conn.createStatement();
 
 		for (int i = 0; i < parkArea.length; i++) {
-			if (parkArea[i].nearIntersection == current) { // ¾î¶² ÁÖÂ÷ ±¸¿ªÀÇ ÀÎÁ¢ ÀÎÅÍ¼½¼ÇÀÌ ÇöÀç ÀÎÅÍ¼½¼ÇÀÎ °æ¿ì
-				if (parkArea[i].remainNum != 0) { // ÀÜ¿©±¸¿ªÀÌ ÀÖ´Ù¸é
+			if (parkArea[i].nearIntersection == current) { // ì–´ë–¤ ì£¼ì°¨ êµ¬ì—­ì˜ ì¸ì ‘ ì¸í„°ì„¹ì…˜ì´ í˜„ì¬ ì¸í„°ì„¹ì…˜ì¸ ê²½ìš°
+				if (parkArea[i].remainNum != 0) { // ì”ì—¬êµ¬ì—­ì´ ìˆë‹¤ë©´
 					String name = parkArea[i].AreaName;
 					int lot = parkArea[i].totalNum - parkArea[i].remainNum + 1;
 					stmt1.executeUpdate("update cars set parkArea = '" + name + Integer.toString(lot) + "' "+ "where carPlate = '" + numPlate + "'");
 					parkArea[i].remainNum--;
-					// ÇÒ´çÇÏ°í firstFind¸¦ true·Î ¹Ù²Ş --> ÇöÀç ÀÎÅÍ¼½¼ÇÀÇ ¹è¿­ ³» ÀÎµ¦½º¸¦ ¹İÈ¯ÇÏ°Ô µÊ
+					// í• ë‹¹í•˜ê³  firstFindë¥¼ trueë¡œ ë°”ê¿ˆ --> í˜„ì¬ ì¸í„°ì„¹ì…˜ì˜ ë°°ì—´ ë‚´ ì¸ë±ìŠ¤ë¥¼ ë°˜í™˜í•˜ê²Œ ë¨
 					firstFind = true;
 				}
 			}
@@ -782,10 +772,10 @@ public class main extends JFrame{
 
 	}
 	
-	/*ÀÎÅÍ¼½¼ÇÀº Â÷·®¿¡°Ô È­»ìÇ¥·Î ¹æÇâ ¾È³»¸¦ ÇÏ±â À§ÇØ ÀÌÀü¿¡ Áö³ª¿Â ÀÎÅÍ¼½¼ÇÀ» ¾Ë¾Æ¾ß ÇÔ
-	 * µû¶ó¼­ °¢ ÀÎÅÍ¼½¼ÇÀº ´ÙÀ½ ÀÎÅÍ¼½¼ÇÀÇ ¾È³»¸¦ À§ÇØ ÀÚ½ÅÀÇ ÀÎµ¦½º¸¦ µ¥ÀÌÅÍº£ÀÌ½ºÀÇ column Áß beforeIntsc¿¡ ÀúÀå
-	 * ¸ğµç ÀÎÅÍ¼½¼ÇÀº ÀÚ½Å¿¡°Ô ´Ù°¡¿À´Â Â÷·®¿¡ ´ëÇØ ÀÌ ÀÛ¾÷À» ¼öÇàÇÏ¸ç 
-	 * ¹æÇâ ¾È³» ÀÌÈÄ ÇØ´ç ÀÛ¾÷À» ¼öÇàÇÔ
+	/*ì¸í„°ì„¹ì…˜ì€ ì°¨ëŸ‰ì—ê²Œ í™”ì‚´í‘œë¡œ ë°©í–¥ ì•ˆë‚´ë¥¼ í•˜ê¸° ìœ„í•´ ì´ì „ì— ì§€ë‚˜ì˜¨ ì¸í„°ì„¹ì…˜ì„ ì•Œì•„ì•¼ í•¨
+	 * ë”°ë¼ì„œ ê° ì¸í„°ì„¹ì…˜ì€ ë‹¤ìŒ ì¸í„°ì„¹ì…˜ì˜ ì•ˆë‚´ë¥¼ ìœ„í•´ ìì‹ ì˜ ì¸ë±ìŠ¤ë¥¼ ë°ì´í„°ë² ì´ìŠ¤ì˜ column ì¤‘ beforeIntscì— ì €ì¥
+	 * ëª¨ë“  ì¸í„°ì„¹ì…˜ì€ ìì‹ ì—ê²Œ ë‹¤ê°€ì˜¤ëŠ” ì°¨ëŸ‰ì— ëŒ€í•´ ì´ ì‘ì—…ì„ ìˆ˜í–‰í•˜ë©° 
+	 * ë°©í–¥ ì•ˆë‚´ ì´í›„ í•´ë‹¹ ì‘ì—…ì„ ìˆ˜í–‰í•¨
 	 */
 	public static void saveIntscIndex(int myIndex, Connection conn) throws IOException, SQLException {
 		Statement stmt2 = conn.createStatement();
@@ -797,16 +787,16 @@ public class main extends JFrame{
 
 	}
 
-	/*detect.py°¡ intersection¿¡¼­ detectÇÑ Â÷·® ¹øÈ£ÆÇÀÇ ¹®ÀÚ¿­Àº intersection_getInÀÌ¶ó´Â Æú´õ¿¡
-	 * ÀúÀåÇØ¾ßÇÔ */
-	/* myIntersectionÀº °¢ ÀÎÅÍ¼½¼ÇÀÇ ¹øÈ£¸¦ ÀÇ¹ÌÇÏ¸ç ÀÌ ºÎºĞÀº ÇÏµå ÄÚµùµÇ¾î ¾÷·Îµå ÇØ¾ß ÇÑ´Ù */
+	/*detect.pyê°€ intersectionì—ì„œ detectí•œ ì°¨ëŸ‰ ë²ˆí˜¸íŒì˜ ë¬¸ìì—´ì€ intersection_getInì´ë¼ëŠ” í´ë”ì—
+	 * ì €ì¥í•´ì•¼í•¨ */
+	/* myIntersectionì€ ê° ì¸í„°ì„¹ì…˜ì˜ ë²ˆí˜¸ë¥¼ ì˜ë¯¸í•˜ë©° ì´ ë¶€ë¶„ì€ í•˜ë“œ ì½”ë”©ë˜ì–´ ì—…ë¡œë“œ í•´ì•¼ í•œë‹¤ */
 	
 	public static void intersectionDisplay(Connection conn, Statement stmt, int myIntersection) throws IOException, SQLException {
 		BufferedReader br = new BufferedReader(new FileReader("intersection_getIn\\nowEnter.txt"));
 		String numPlate = br.readLine();
 
 		int beforeIndex, currentIndex, nextIndex;
-		System.out.println("ÀÎÅÍ¼½¼ÇÀÇ ¹øÈ£´Â 0~7 ÀÌ´Ù. 1~8 ÀÌ ¾Æ´Ñ ¹è¿­ ³»ÀÇ ÀÎµ¦½º¸¦ Ãâ·ÂÇÑ´Ù\n\n");
+		System.out.println("ì¸í„°ì„¹ì…˜ì˜ ë²ˆí˜¸ëŠ” 0~7 ì´ë‹¤. 1~8 ì´ ì•„ë‹Œ ë°°ì—´ ë‚´ì˜ ì¸ë±ìŠ¤ë¥¼ ì¶œë ¥í•œë‹¤\n\n");
 
 		List<Intersection> currentPath = new ArrayList<Intersection>();
 
@@ -816,22 +806,22 @@ public class main extends JFrame{
 			String[] area_path = { rs_car.getString(1), rs_car.getString(2), rs_car.getString(3) };
 			area_path[1] = area_path[1].replaceAll(" ", "");
 			int driverError = Arrays.asList(area_path[1].split(",")).indexOf(Integer.toString(myIntersection));
-			// System.out.println("¿îÀüÀÚ°¡ ±æÀ» Àß¸øµé¾ú´Ù¸é -1 Ãâ·Â :"+driverError);
+			// System.out.println("ìš´ì „ìê°€ ê¸¸ì„ ì˜ëª»ë“¤ì—ˆë‹¤ë©´ -1 ì¶œë ¥ :"+driverError);
 
 			int beforeIndex_sql = Integer.parseInt(area_path[2]);
 			if (driverError == -1) {
 				String goalAreaName = area_path[0].substring(0, 1);
-				// ±æÀ» Àß¸ø µç ¿îÀüÀÚ¿¡°Ô ÇÒ´çµÈ ÁÖÂ÷ ±¸¿ªÀ» ¾Ë¾Æ³¿
-				Intersection goalIntersection = parkArea[goalAreaName.charAt(0) - 65].nearIntersection; 																	// °¡Á®¿È
+				// ê¸¸ì„ ì˜ëª» ë“  ìš´ì „ìì—ê²Œ í• ë‹¹ëœ ì£¼ì°¨ êµ¬ì—­ì„ ì•Œì•„ëƒ„
+				Intersection goalIntersection = parkArea[goalAreaName.charAt(0) - 65].nearIntersection; 																	// ê°€ì ¸ì˜´
 				AstarSearch(n[myIntersection - 1], goalIntersection, n[beforeIndex_sql - 1]);//
 				List<Intersection> newPathMyIntersection = printPath(goalIntersection);
 				List<Intersection> tempPath = printPathTemp(n[myIntersection-1],goalIntersection,n[beforeIndex_sql-1]);
 
 				currentIndex = myIntersection - 1;
-				System.out.println("»õ·Ó°Ô ÁöÁ¤µÈ path´Â " + newPathMyIntersection);
-				System.out.println("ÀÓ½Ã·Î ¸¸µç printPathTempÀÇ Ãâ·ÂÀº "+tempPath);
+				System.out.println("ìƒˆë¡­ê²Œ ì§€ì •ëœ pathëŠ” " + newPathMyIntersection);
+				System.out.println("ì„ì‹œë¡œ ë§Œë“  printPathTempì˜ ì¶œë ¥ì€ "+tempPath);
 				if (newPathMyIntersection.size() != 1) {
-					System.out.println("(0~7 »çÀÌ Ãâ·Â)¿îÀüÀÚ°¡ ±æÀ» Àß¸ø µé¾úÀ¸¸ç »õ·Ó°Ô ÁöÁ¤µÈ PathÀÇ ±æÀÌ°¡ 1º¸´Ù ±æ ¶§,±×¸®°í »õ·Î¿î PathÀÇ ±æÀÌ´Â "+ newPathMyIntersection.size());
+					System.out.println("(0~7 ì‚¬ì´ ì¶œë ¥)ìš´ì „ìê°€ ê¸¸ì„ ì˜ëª» ë“¤ì—ˆìœ¼ë©° ìƒˆë¡­ê²Œ ì§€ì •ëœ Pathì˜ ê¸¸ì´ê°€ 1ë³´ë‹¤ ê¸¸ ë•Œ,ê·¸ë¦¬ê³  ìƒˆë¡œìš´ Pathì˜ ê¸¸ì´ëŠ” "+ newPathMyIntersection.size());
 					Intersection beforeIntsc = n[beforeIndex_sql-1];
 					currentPath.add(beforeIntsc);
 					currentPath.addAll(tempPath);
@@ -840,10 +830,10 @@ public class main extends JFrame{
 
 					printDisplay(currentPath);
 				} else {
-					System.out.println("¿îÀüÀÚ°¡ ±æÀ» Àß¸ø µé¾úÀ¸¸ç »õ·Ó°Ô ÁöÁ¤µÈ PathÀÇ ±æÀÌ°¡ 1ÀÏ ¶§ (0~7 »çÀÌ Ãâ·Â)");
-					System.out.println("ÇöÀç ÀÎÅÍ¼½¼ÇÀÇ ¹øÈ£");
+					System.out.println("ìš´ì „ìê°€ ê¸¸ì„ ì˜ëª» ë“¤ì—ˆìœ¼ë©° ìƒˆë¡­ê²Œ ì§€ì •ëœ Pathì˜ ê¸¸ì´ê°€ 1ì¼ ë•Œ (0~7 ì‚¬ì´ ì¶œë ¥)");
+					System.out.println("í˜„ì¬ ì¸í„°ì„¹ì…˜ì˜ ë²ˆí˜¸");
 					System.out.println(currentIndex);
-					// ¿©±â´Â ¾Æ¹«°Íµµ ÇÁ¸°Æ® ÇÏÁö ¾Ê
+					// ì—¬ê¸°ëŠ” ì•„ë¬´ê²ƒë„ í”„ë¦°íŠ¸ í•˜ì§€ ì•Š
 				}
 
 			} else {
@@ -853,15 +843,15 @@ public class main extends JFrame{
 				if (tempPath.indexOf(Integer.toString(myIntersection)) != 0) {
 					beforeIndex = Integer.parseInt(tempPath.get(tempPath.indexOf(Integer.toString(myIntersection)) - 1))- 1;
 				} else {
-					System.out.println("ÇöÀç ÀÎÅÍ¼½¼ÇÀº ¿îÀüÀÚ¿¡°Ô ±âÁ¸¿¡ ÇÒ´çµÈ PathÀÇ Ã¹¹øÂ° ÀÎÅÍ¼½¼ÇÀÌ¹Ç·Î ÀÌÀü ÀÎÅÍ¼½¼ÇÀ» ³ªÅ¸³»´Â beforeIndex º¯¼ö¿¡ -1À» ÇÒ´çÇÑ´Ù");
+					System.out.println("í˜„ì¬ ì¸í„°ì„¹ì…˜ì€ ìš´ì „ìì—ê²Œ ê¸°ì¡´ì— í• ë‹¹ëœ Pathì˜ ì²«ë²ˆì§¸ ì¸í„°ì„¹ì…˜ì´ë¯€ë¡œ ì´ì „ ì¸í„°ì„¹ì…˜ì„ ë‚˜íƒ€ë‚´ëŠ” beforeIndex ë³€ìˆ˜ì— -1ì„ í• ë‹¹í•œë‹¤");
 					beforeIndex = -1;
 				}
 				int myIndexOfOriginPath = tempPath.indexOf(Integer.toString(myIntersection));
 
 				if (myIndexOfOriginPath + 1 != tempPath.size()) {
-					System.out.println("¿îÀüÀÚ°¡ ±âÁ¸ÀÇ path´ë·Î ¿îÀüÇÏ°í ÀÖÀ¸¸ç ÇöÀç ÀÎÅÍ¼½¼Ç ÀÌÈÄ¿¡µµ °ÅÃÄ°¡¾ßÇÒ ÀÎÅÍ¼½¼ÇÀÌ ´õ ³²¾ÆÀÖÀ» ¶§");
+					System.out.println("ìš´ì „ìê°€ ê¸°ì¡´ì˜ pathëŒ€ë¡œ ìš´ì „í•˜ê³  ìˆìœ¼ë©° í˜„ì¬ ì¸í„°ì„¹ì…˜ ì´í›„ì—ë„ ê±°ì³ê°€ì•¼í•  ì¸í„°ì„¹ì…˜ì´ ë” ë‚¨ì•„ìˆì„ ë•Œ");
 					nextIndex = Integer.parseInt(tempPath.get(myIndexOfOriginPath + 1)) - 1;
-					System.out.println("ÇöÀç ÀÎÅÍ¼½¼ÇÀÇ ¹øÈ£, ÀÌÀü ÀÎÅÍ¼½¼ÇÀÇ ¹øÈ£, ´ÙÀ½¿¡ Áö³ª°¡¾ßÇÒ ÀÎÅÍ¼½¼ÇÀÇ ¹øÈ£");
+					System.out.println("í˜„ì¬ ì¸í„°ì„¹ì…˜ì˜ ë²ˆí˜¸, ì´ì „ ì¸í„°ì„¹ì…˜ì˜ ë²ˆí˜¸, ë‹¤ìŒì— ì§€ë‚˜ê°€ì•¼í•  ì¸í„°ì„¹ì…˜ì˜ ë²ˆí˜¸");
 					System.out.println(currentIndex + " " + beforeIndex + " " + nextIndex);
 					currentPath.add(n[beforeIndex]);
 					currentPath.add(n[currentIndex]);
@@ -869,23 +859,23 @@ public class main extends JFrame{
 					printDisplay(currentPath);
 
 				} else {
-					System.out.println("¿îÀüÀÚ°¡ ±âÁ¸ÀÇ path´ë·Î ¿îÀüÇÏ°í ÀÖÀ¸¸ç ÇöÀç ÀÎÅÍ¼½¼Ç ÀÌÈÄ¿¡ °ÅÃÄ°¡¾ß ÇÒ ÀÎÅÍ¼½¼ÇÀÌ ¾øÀ» ¶§");
-					System.out.println("ÇöÀç ÀÎÅÍ¼½¼ÇÀÇ ¹øÈ£, ÀÌÀü ÀÎÅÍ¼½¼ÇÀÇ ¹øÈ£");
+					System.out.println("ìš´ì „ìê°€ ê¸°ì¡´ì˜ pathëŒ€ë¡œ ìš´ì „í•˜ê³  ìˆìœ¼ë©° í˜„ì¬ ì¸í„°ì„¹ì…˜ ì´í›„ì— ê±°ì³ê°€ì•¼ í•  ì¸í„°ì„¹ì…˜ì´ ì—†ì„ ë•Œ");
+					System.out.println("í˜„ì¬ ì¸í„°ì„¹ì…˜ì˜ ë²ˆí˜¸, ì´ì „ ì¸í„°ì„¹ì…˜ì˜ ë²ˆí˜¸");
 					System.out.println(currentIndex + " " + beforeIndex);
-					// ¿©±âµµ ÇÁ¸°Æ® ÇÒ°Å ¾øÀ» µí?
+					// ì—¬ê¸°ë„ í”„ë¦°íŠ¸ í• ê±° ì—†ì„ ë“¯?
 				}
 
 			}
 		}
 	}
 
-	// main¿¡¼­´Â »ç¿ëÀÚ ÀÔ·Â¹Ş¾Æ¼­ ÀûÀıÇÑ ÇÔ¼ö¸¸ È£ÃâÇÏ´Â ½ÄÀ¸·Î º¯°æ
+	// mainì—ì„œëŠ” ì‚¬ìš©ì ì…ë ¥ë°›ì•„ì„œ ì ì ˆí•œ í•¨ìˆ˜ë§Œ í˜¸ì¶œí•˜ëŠ” ì‹ìœ¼ë¡œ ë³€ê²½
 	public static void main(String[] args) throws IOException, SQLException, InterruptedException {
 
 		Scanner sc = new Scanner(System.in);
 		int user_input = -1;
 
-		/*ÁÖÂ÷ ±¸¿ª, ÀÎÅÍ¼½¼Ç, »óÀ§ ÁÖÂ÷ ±¸¿ª, ¼±È£µµ¿¡ µû¸¥ ¿ì¼±¼øÀ§ Å¥, Àü±¤ÆÇ °´Ã¼, ÁÖÂ÷ ±¸¿ªÀÌ °®´Â Á¡¼ö ÃÊ±âÈ­*/
+		/*ì£¼ì°¨ êµ¬ì—­, ì¸í„°ì„¹ì…˜, ìƒìœ„ ì£¼ì°¨ êµ¬ì—­, ì„ í˜¸ë„ì— ë”°ë¥¸ ìš°ì„ ìˆœìœ„ í, ì „ê´‘íŒ ê°ì²´, ì£¼ì°¨ êµ¬ì—­ì´ ê°–ëŠ” ì ìˆ˜ ì´ˆê¸°í™”*/
 		setParkingArea();
 		setIntersection();
 		setArea();
@@ -893,7 +883,7 @@ public class main extends JFrame{
 		setDisplay();
 		setParkAreaScore();
 
-		/*ÁÖÂ÷ÀåÀÇ µ¥ÀÌÅÍº£ÀÌ½º¿Í ¿¬°á*/
+		/*ì£¼ì°¨ì¥ì˜ ë°ì´í„°ë² ì´ìŠ¤ì™€ ì—°ê²°*/
 		try {
 			Class.forName(JDBC_driver);
 			conn = DriverManager.getConnection(DB_url, User, password);
@@ -902,20 +892,12 @@ public class main extends JFrame{
 			e.printStackTrace();
 		}
 		
-		/*gateUI(user_input,sc,conn,stmt) ÇÔ¼ö´Â Â÷·®ÀÌ ÀÔÂ÷ÇÏ´Â °÷¿¡¼­ È£ÃâµÇ´Â ÇÔ¼ö
-		 * ´Ù¸¥ °÷¿¡¼­´Â ÇÊ¿ä ¾øÀ½
-		 */
+		
 		// gateUI(user_input,sc,conn, stmt);
 		
-		/*ÇöÀç´Â ¼öÁ¤µÈ AstarSearch()¿Í printPathTempÀÇ ¿¡·¯ ¿©ºÎ È®ÀÎÀ» À§ÇØ saveIntscIndex()¸¦ ¸ÕÀú È£ÃâÇÏ¿´Áö¸¸
-		 * °¢ ÀÎÅÍ¼½¼Ç¿¡¼­´Â intersectionDisplay()-> saveIntscIndex() ¼ø¼­·Î È£ÃâµÇ¾î¾ß ÇÔ
-		 */
 		saveIntscIndex(1, conn);
 		intersectionDisplay(conn, stmt, 2);
-		// 1,2 / 6,5 ¸ğµÎ Á¤»óÀûÀÎ Ãâ·ÂÀ» ÇÏ°í ÀÖÀ½ //1,8µµ Á¤»óÀûÀ¸·Î Ãâ·ÂÇÔ (5¹ø ÀÎÅÍ¼½¼ÇÀ¸·Î º¸³»¾ßÇÒ¶§ 87345³ª 87325 Ãâ·Â)
-		//ÀÏ´Ü °¢ if~else·Î Á¤»óÀûÀ¸·Î µé¾î°¡´Â °ÍÀ» È®ÀÎÇßÀ½
-		// A~L±¸¿ª ¸ğµÎ Á¦´ë·Î ¾È³»ÇÏ´ÂÁö Å×½ºÆ®ÄÉÀÌ½º¸¦ ´õ ¸¸µé¾î¼­ È®ÀÎÇØºÁ¾ßÇÔ
-		//printDisplay() ÇÔ¼ö¿¡¼­ ³õÄ£ °æ¿ì°¡ ÀÖ´Â °ÍÀ¸·Î »ı°¢µÊ. (ex: down¿¡¼­ ¾È³»ÇØ¾ßÇÒ °ÍÀ» up¿¡¼­ ¾È³»ÇÑ´ÙµçÁö..)
+		
 		
 
 	}
