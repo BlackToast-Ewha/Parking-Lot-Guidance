@@ -3,13 +3,13 @@
 public class Intersection {
 
 	public double g_scores;
-	public double h_scores = 0.0; // ÀÌ°Å »ç½ÇÀº ÇÏ³ªÇÏ³ª ´Ù¸¥ °ªÀ¸·Î initialize ÇØÁà¾ß ÇÏ´Â
-										// °Í °°À½ astar Á¤ÀÇ»ó
+	public double h_scores = 0.0; // ì´ê±° ì‚¬ì‹¤ì€ í•˜ë‚˜í•˜ë‚˜ ë‹¤ë¥¸ ê°’ìœ¼ë¡œ initialize í•´ì¤˜ì•¼ í•˜ëŠ”
+										// ê²ƒ ê°™ìŒ astar ì •ì˜ìƒ
 	public double f_scores = 0;
 	public Edge[] adjacencies;
 	public Intersection parent;
 	public Intersection child;
-	public int index;// intersectionÀÇ index(¹øÈ£)
+	public int index;// intersectionì˜ index(ë²ˆí˜¸)
 
 	public int row;
 	public int col;
@@ -43,7 +43,6 @@ public class Intersection {
 //			source_child[i] = this.adjacencies[i].target;
 //		}
 //	}
-
 	public void calculateHScore(Intersection dest) {
 		this.h_scores = Math.abs(dest.getRow() - this.getRow()) + Math.abs(dest.getCol() - this.getCol());
 
