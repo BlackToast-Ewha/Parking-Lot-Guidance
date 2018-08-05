@@ -1,11 +1,11 @@
 
 import java.util.ArrayList;
 
-// IntersectionÀ» Node·Î ÇÏ´Â ±×·¡ÇÁÀÇ Edge
+// Intersectionì„ Nodeë¡œ í•˜ëŠ” ê·¸ë˜í”„ì˜ Edge
 public class Edge {
 	public final double cost;
 	public final Intersection target;
-	public ArrayList<ParkingArea> NA;// ÇØ´ç edge¿¡¼­ ÁÖº¯ºÎ¿¡ ÀÖ´Â ÁÖÂ÷ ±¸¿ªÀ» ¹è¿­¸®½ºÆ®·Î ÀúÀå
+	public ArrayList<ParkingArea> NA;// í•´ë‹¹ edgeì—ì„œ ì£¼ë³€ë¶€ì— ìˆëŠ” ì£¼ì°¨ êµ¬ì—­ì„ ë°°ì—´ë¦¬ìŠ¤íŠ¸ë¡œ ì €ì¥
 
 	public Edge(Intersection targetNode, double costVal) {
 		NA = new ArrayList<ParkingArea>(); 
@@ -13,9 +13,8 @@ public class Edge {
 		cost = costVal;
 	}
 
-	public void Decide_Area(ParkingArea[] A) {// ¹è¿­¸®½ºÆ®¿¡ ÁÖÂ÷ ±¸¿ªÀ» Ãß°¡ÇØÁÜ
+	public void Decide_Area(ParkingArea[] A) {// ë°°ì—´ë¦¬ìŠ¤íŠ¸ì— ì£¼ì°¨ êµ¬ì—­ì„ ì¶”ê°€í•´ì¤Œ
 		NA.add(A[0]);
 
 	}// Decide_Area
-
 }
