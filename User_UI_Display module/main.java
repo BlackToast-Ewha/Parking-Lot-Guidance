@@ -20,7 +20,7 @@ import javax.swing.*;
 import java.awt.event.*;
 
 
-public class main extends JFrame{
+public class main {
 	
 	
 	
@@ -38,9 +38,9 @@ public class main extends JFrame{
 	
 	/*MySQL 데이터베이스 연결에 필요한 변수 선언*/
 	static final String JDBC_driver = "com.mysql.cj.jdbc.Driver";
-	static final String DB_url = "jdbc:mysql://localhost:3306/blacktoast?useSSL=false&serverTimezone=UTC";
-	static final String User = "root";
-	static final String password = "team15";
+	static final String DB_url = "jdbc:mysql://localhost:3306/use_your_db_name";
+	static final String User = "use_your_user_name";
+	static final String password = "use_your_password";
 	static Connection conn = null;
 	static Statement stmt = null;
 	
