@@ -1,10 +1,10 @@
 
 public class ParkingArea {
-	int in;// Àû¿Ü¼± ¼¾¼­¿¡¼­ ¹Ş¾Æ¿Â Â÷·® ÁÖÂ÷ ¿©ºÎ,1ÀÌ¸é ÁÖÂ÷ Áß , 0ÀÌ¸é ºñ¾îÀÖ´Â °ø°£
-	String Area_Name;// ex) A±¸¿ªÀÌ¶ó¸é Area_Name = A;
-	int index;// ParkingArea ¹è¿­¿¡¼­ÀÇ index
+	int in;// ì ì™¸ì„  ì„¼ì„œì—ì„œ ë°›ì•„ì˜¨ ì°¨ëŸ‰ ì£¼ì°¨ ì—¬ë¶€,1ì´ë©´ ì£¼ì°¨ ì¤‘ , 0ì´ë©´ ë¹„ì–´ìˆëŠ” ê³µê°„
+	String Area_Name;// ex) Aêµ¬ì—­ì´ë¼ë©´ Area_Name = A;
+	int index;// ParkingArea ë°°ì—´ì—ì„œì˜ index
 	char Dis = ' ';
-
+	
 	ParkingArea() {
 	}
 
@@ -15,7 +15,7 @@ public class ParkingArea {
 		this.Dis = Dis;
 	}
 	
-	// È®ÀÎÂ÷ toString() ÇÔ¼ö Ãß°¡
+	// í™•ì¸ì°¨ toString() í•¨ìˆ˜ ì¶”ê°€
 	public String toString() {
 		return "Area_Name:" + Area_Name + "\nin:" + in + "\nindex:" + index + "\nDis:" + Dis + "\n";
 	}
