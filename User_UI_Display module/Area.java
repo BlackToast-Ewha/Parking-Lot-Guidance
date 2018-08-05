@@ -18,5 +18,4 @@ public class Area {
 		this.indexInPA = indexPA;
 	}
 
-
 }
